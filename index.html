@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07130f">
+<meta name="description" content="ระบบติดตามผลการดำเนินงานโรงเรียนอาหารปลอดภัย จังหวัดนราธิวาส เชื่อมฐานข้อมูลแบบเรียลไทม์">
+<title>ระบบติดตามโรงเรียนอาหารปลอดภัย · นราธิวาส</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: hsl(160 55% 4%);
+  --bg-mid: hsl(158 45% 9%);
+  --accent: hsl(152 68% 52%);
+  --accent-soft: hsl(152 68% 52% / 0.18);
+  --gold: hsl(42 90% 62%);
+  --text: hsl(150 25% 94%);
+  --text-dim: hsl(150 12% 68%);
+  --banner-clip: 40px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg-deep);
+  font-family: "Outfit", "Noto Sans Thai", system-ui, sans-serif;
+  color: var(--text);
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
+}
+
+.stage {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg-deep);
+}
+
+.frame {
+  position: absolute;
+  left: 0;
+  top: calc(var(--banner-clip) * -1);
+  width: 100%;
+  height: calc(100% + var(--banner-clip));
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: block;
+  background: #fff;
+  opacity: 0;
+  transform: scale(0.992);
+  transition: opacity 0.7s var(--ease), transform 0.9s var(--ease);
+}
+
+.stage.is-ready .frame {
+  opacity: 1;
+  transform: none;
+}
+
+.loader {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+  background:
+    radial-gradient(60rem 40rem at 15% 10%, hsl(152 70% 30% / 0.35), transparent 60%),
+    radial-gradient(50rem 36rem at 90% 95%, hsl(42 80% 45% / 0.18), transparent 60%),
+    linear-gradient(160deg, var(--bg-mid), var(--bg-deep));
+  transition: opacity 0.8s var(--ease), visibility 0s linear 0.8s, transform 0.8s var(--ease);
+}
+
+.stage.is-ready .loader {
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(1.04);
+  pointer-events: none;
+}
+
+.loader__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  background-image:
+    linear-gradient(hsl(150 30% 60% / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(150 30% 60% / 0.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 70%);
+  -webkit-mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 70%);
+}
+
+.loader__content {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 440px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: clamp(16px, 3.2vh, 28px);
+  animation: rise 1s var(--ease) both;
+}
+
+.emblem {
+  position: relative;
+  width: clamp(112px, 28vmin, 156px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+
+.emblem__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+  border-top-color: var(--accent);
+  border-right-color: hsl(152 68% 52% / 0.25);
+  animation: spin 1.6s linear infinite;
+}
+
+.emblem__ring--inner {
+  inset: 14%;
+  border-top-color: var(--gold);
+  border-right-color: hsl(42 90% 62% / 0.2);
+  animation-duration: 2.4s;
+  animation-direction: reverse;
+}
+
+.emblem__pulse {
+  position: absolute;
+  inset: 26%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-soft), transparent 70%);
+  animation: breathe 2.4s ease-in-out infinite;
+}
+
+.emblem__icon {
+  position: relative;
+  width: 36%;
+  height: 36%;
+  color: var(--accent);
+  filter: drop-shadow(0 0 14px hsl(152 70% 50% / 0.55));
+  animation: float 3.2s ease-in-out infinite;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.15rem, 4.2vw, 1.6rem);
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: 0.005em;
+  text-wrap: balance;
+  background: linear-gradient(100deg, var(--text) 30%, hsl(152 70% 78%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: clamp(0.85rem, 3vw, 1rem);
+  line-height: 1.6;
+  color: var(--text-dim);
+  text-wrap: balance;
+}
+
+.progress {
+  position: relative;
+  width: min(100%, 280px);
+  height: 3px;
+  border-radius: 999px;
+  background: hsl(150 20% 60% / 0.14);
+  overflow: hidden;
+}
+
+.progress__bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--gold));
+  animation: sweep 1.5s var(--ease) infinite;
+}
+
+.status {
+  margin: 0;
+  min-height: 1.4em;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  transition: opacity 0.2s ease;
+}
+
+.retry {
+  appearance: none;
+  display: none;
+  cursor: pointer;
+  padding: 12px 24px;
+  border-radius: 999px;
+  border: 1px solid hsl(152 68% 52% / 0.5);
+  background: hsl(152 68% 52% / 0.12);
+  color: var(--text);
+  font: 500 0.95rem "Outfit", "Noto Sans Thai", sans-serif;
+  transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+}
+
+.retry:hover { background: hsl(152 68% 52% / 0.22); border-color: var(--accent); }
+.retry:active { transform: scale(0.97); }
+.retry:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+.loader.is-slow .retry { display: inline-block; animation: rise 0.6s var(--ease) both; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes sweep { 0% { transform: translateX(-100%); } 100% { transform: translateX(260%); } }
+@keyframes breathe { 0%, 100% { transform: scale(0.8); opacity: 0.6; } 50% { transform: scale(1.15); opacity: 1; } }
+@keyframes float { 0%, 100% { transform: translateY(2px); } 50% { transform: translateY(-4px); } }
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .loader__content { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 16px 28px; width: min(100%, 760px); text-align: left; }
+  .loader__text { max-width: 360px; display: grid; gap: 10px; justify-items: start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+
+noscript {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  background: var(--bg-deep);
+  color: var(--text);
+  padding: 24px;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+<main class="stage" id="stage">
+  <iframe
+    class="frame"
+    id="app-frame"
+    title="ระบบติดตามผลการดำเนินงานโรงเรียนอาหารปลอดภัย จังหวัดนราธิวาส"
+    allow="fullscreen; clipboard-write; geolocation"
+    allowfullscreen
+    referrerpolicy="no-referrer"
+    scrolling="no"
+    frameborder="0"></iframe>
+
+  <section class="loader" id="loader" aria-live="polite" aria-busy="true">
+    <div class="loader__grain" aria-hidden="true"></div>
+    <div class="loader__content">
+      <div class="emblem" aria-hidden="true">
+        <span class="emblem__pulse"></span>
+        <span class="emblem__ring"></span>
+        <span class="emblem__ring emblem__ring--inner"></span>
+        <svg class="emblem__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3l7 3v5c0 4.6-3 8.2-7 10-4-1.8-7-5.4-7-10V6l7-3z"/>
+          <path d="M8.8 12.2l2.2 2.2 4.2-4.6"/>
+        </svg>
+      </div>
+      <div class="loader__text">
+        <h1 class="title">ระบบติดตามผลการดำเนินงาน<br>โรงเรียนอาหารปลอดภัย</h1>
+        <p class="subtitle">จังหวัดนราธิวาส · เชื่อมฐานข้อมูลแบบเรียลไทม์</p>
+      </div>
+      <div class="progress" aria-hidden="true"><span class="progress__bar"></span></div>
+      <p class="status" id="status">กำลังเชื่อมต่อฐานข้อมูล…</p>
+      <button class="retry" id="retry" type="button">ลองโหลดอีกครั้ง</button>
+    </div>
+  </section>
+
+  <noscript>กรุณาเปิดใช้งาน JavaScript เพื่อใช้งานระบบนี้</noscript>
+</main>
+
+<script>
+(function () {
+  var SLOW_AFTER_MS = 12000;
+  var MIN_SHOW_MS = 900;
+  var TARGET = ["https://script.google.com/macros/s/",
+    "AKfycbzTCoz5c6kwxk8ILrdvADpaDhQfW6VtcjL5tveEHpqQ2rL9NcoKuL5hbaITakDi6aeQ",
+    "/exec"].join("");
+
+  var stage = document.getElementById("stage");
+  var frame = document.getElementById("app-frame");
+  var loader = document.getElementById("loader");
+  var status = document.getElementById("status");
+  var retry = document.getElementById("retry");
+  var startedAt = 0;
+  var slowTimer = 0;
+
+  function revealApp() {
+    var elapsed = performance.now() - startedAt;
+    var wait = Math.max(0, MIN_SHOW_MS - elapsed);
+    window.clearTimeout(slowTimer);
+    window.setTimeout(function () {
+      stage.classList.add("is-ready");
+      loader.setAttribute("aria-busy", "false");
+      frame.focus();
+    }, wait);
+  }
+
+  function flagSlowLoad() {
+    loader.classList.add("is-slow");
+    status.textContent = "การเชื่อมต่อใช้เวลานานกว่าปกติ";
+  }
+
+  function loadApp() {
+    stage.classList.remove("is-ready");
+    loader.classList.remove("is-slow");
+    loader.setAttribute("aria-busy", "true");
+    status.textContent = "กำลังเชื่อมต่อฐานข้อมูล…";
+    startedAt = performance.now();
+    window.clearTimeout(slowTimer);
+    slowTimer = window.setTimeout(flagSlowLoad, SLOW_AFTER_MS);
+    frame.src = TARGET;
+  }
+
+  frame.addEventListener("load", function () {
+    if (!frame.getAttribute("src")) return;
+    status.textContent = "พร้อมใช้งาน";
+    revealApp();
+  });
+
+  retry.addEventListener("click", function () {
+    frame.removeAttribute("src");
+    window.requestAnimationFrame(loadApp);
+  });
+
+  loadApp();
+})();
+</script>
+</body>
+</html>
