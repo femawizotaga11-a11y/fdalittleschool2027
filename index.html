@@ -42,9 +42,6 @@ html, body {
 .stage {
   position: fixed;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
   overflow: hidden;
   background: var(--bg-deep);
 }
@@ -163,7 +160,6 @@ html, body {
   font-size: clamp(1.15rem, 4.2vw, 1.6rem);
   font-weight: 600;
   line-height: 1.45;
-  letter-spacing: 0.005em;
   text-wrap: balance;
   background: linear-gradient(100deg, var(--text) 30%, hsl(152 70% 78%));
   -webkit-background-clip: text;
@@ -258,7 +254,7 @@ noscript {
     class="frame"
     id="app-frame"
     title="ระบบติดตามผลการดำเนินงานโรงเรียนอาหารปลอดภัย จังหวัดนราธิวาส"
-    allow="fullscreen; clipboard-write; geolocation"
+    allow="fullscreen"
     allowfullscreen
     referrerpolicy="no-referrer"
     scrolling="no"
